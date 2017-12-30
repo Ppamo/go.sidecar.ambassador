@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -26,7 +25,6 @@ func LoadConfig(configPath string) (Configuration, error) {
 	file, e := os.Open(configPath)
 	defer file.Close()
 	if e != nil {
-		fmt.Printf("Could not open file %s\n%v\n", configPath, e)
 		return config, e
 	}
 	parser := json.NewDecoder(file)
