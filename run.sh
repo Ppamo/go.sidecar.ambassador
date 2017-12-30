@@ -1,8 +1,15 @@
 #!/bin/bash
 
+if [ -z "$GOPATH" ]
+then
+	echo "* GOPATH is not set!"
+	exit -1
+fi
+
+# functions
 sigint_handler(){
-	ID=$(docker ps --format="{{.ID}}" --filter="name=$APP")
 	printf "${ORANGE}* Stopping app ${NC}\n"
+	ID=$(docker ps --format="{{.ID}}" --filter="name=$APP")
 	if [ "$ID" ]
 	then
 		docker stop $ID
@@ -10,12 +17,6 @@ sigint_handler(){
 		echo "no container found"
 	fi
 }
-
-if [ -z "$GOPATH" ]
-then
-	echo "* GOPATH is not set!"
-	exit -1
-fi
 
 # constants
 APP="sidecar.ambassador"
@@ -30,9 +31,6 @@ NC='\033[0m'
 
 # vars
 BINARYFILE="$GOPATH/src/$SRC/$DST"
-
-# handle keyboard termination signal
-trap sigint_handler SIGINT
 
 # clean up
 rm -f $BINARYFILE
@@ -56,6 +54,7 @@ then
 	if [ $IMAGESNUMBER -gt 0 ]
 	then
 		printf "${ORANGE}* Running container ${NC}\n"
+		trap sigint_handler SIGINT
 		docker run --rm --name "$APP" -i $IMAGENAME:$VERSION
 	fi
 	exit 0
