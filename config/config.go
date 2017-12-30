@@ -11,7 +11,8 @@ type Configuration struct {
 }
 
 type Server struct {
-	Port int `json:"port"`
+	Host string `json: "host"`
+	Port int    `json:"port"`
 }
 
 type Parent struct {
