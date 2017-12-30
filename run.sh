@@ -41,11 +41,11 @@ bash build.sh "$SRC" "$DST"
 
 if [ -x $BINARYFILE ]
 then
-	IMAGEVERSION=$(docker images | grep "$IMAGENAME" | awk '{ print $2 }')
+	IMAGEVERSION=$(docker images $IMAGENAME --format "{{.Tag}}")
 	if [ "$IMAGEVERSION" ]
 	then
-		printf "${ORANGE}* Deleting image $IMAGENAME:$VERSION ${NC}\n"
-		docker rmi $IMAGENAME:$VERSION
+		printf "${ORANGE}* Deleting image $IMAGENAME:$IMAGEVERSION ${NC}\n"
+		docker rmi $IMAGENAME:$IMAGEVERSION
 	fi
 	printf "${ORANGE}* Building docker image $IMAGENAME:$VERSION ${NC}\n"
 	docker build -t $IMAGENAME:$VERSION docker/
