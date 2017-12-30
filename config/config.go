@@ -1,24 +1,24 @@
 package config
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
 type Configuration struct {
-	*Server
-	*Parent
+	*Server `json:"server"`
+	*Parent `json:"parent"`
 }
 
 type Server struct {
-	Port	int		`json:"port"`
+	Port int `json:"port"`
 }
 
 type Parent struct {
-	Destination	string	`json:"destination"`
-	UrlPrefix	string	`json:"urlPrefix"`
-	ServiceInfoUrl	string	`json:"serviceInfoUrl"`
+	Destination    string `json:"destination"`
+	UrlPrefix      string `json:"urlPrefix"`
+	ServiceInfoUrl string `json:"serviceInfoUrl"`
 }
 
 func LoadConfig(configPath string) (Configuration, error) {
