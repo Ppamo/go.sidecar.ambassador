@@ -1,0 +1,10 @@
+{
+	"server": {
+		"port": 8080
+	},
+	"parent": {
+		"destination": "http://localhost:8081",
+		"urlPrefix": "/channelActivityHistory/v1.0/contextodatos",
+		"serviceInfoURL": "/serviceInfo?item=validation"
+	}
+}
