@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-	config, e := config.LoadConfig("config/main.json")
+	config, e := config.LoadConfig("config/config_test.json")
 	if e != nil {
 		fmt.Printf("Error generating conf\n%v\n", e)
 	}
-	fmt.Printf("server port: %i\n", config.Server.Port)
+	fmt.Printf("server port: %v\n", config.Server.Port)
 }
