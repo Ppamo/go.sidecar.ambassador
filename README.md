@@ -1,2 +1,2 @@
-# go.sidecar.gatekeeper
-Validation sidecar wroted in GO
+# go.sidecar.ambassador
+A validation sidecar wroted in golang
