@@ -11,6 +11,6 @@ func main() {
 	if e != nil {
 		fmt.Printf("Error generating conf\n%v\n", e)
 	}
+	fmt.Printf("=> Starting server at %s:%v\n", config.Server.Host, config.Server.Port)
 	server.StartServer(config)
-	fmt.Printf("server port: %v\n", config.Server.Port)
 }
