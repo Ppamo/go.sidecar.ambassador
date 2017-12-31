@@ -1,0 +1,89 @@
+{
+	"enabled": [{
+		"description": "Persistir datos de canal",
+		"method": "post",
+		"path": "/persistirDatoCanal",
+		"params": null,
+		"body":
+		{
+			"$schema": "http://json-schema.org/draft-06/schema#",
+			"title": "POST.PersistirDatosCanal",
+			"description": "POST request to PersistirDatosCanal Endpoint",
+			"type": "object",
+			"properties": {
+				"context": {
+					"description": "context definition",
+					"type": "object",
+					"properties": {
+						"channel_id": { "type": "string", "minLength": 1 },
+						"application": { "type": "string", "minLength": 1 },
+						"transaction_id": { "type": "string", "minLength": 1 },
+						"timestamp": { "type": "string", "minLength": 1 }
+					},
+					"required": ["channel_id", "application", "transaction_id", "timestamp"],
+					"additionalProperties": false
+				},
+				"data_context": {
+					"description": "data_context definition",
+					"type": "object",
+					"properties": {
+						"user_id": { "type": "string", "minLength": 1 },
+						"label": { "type": "string", "minLength": 1 },
+						"session_status": { "type": "string" },
+						"current_counter": { "type": "number" },
+						"duration": { "type": "number", "minimum": 1 },
+						"flow_detail": { "type": "object" }
+					},
+					"required": ["user_id", "label", "session_status", "current_counter", "duration", "flow_detail"],
+					"additionalProperties": false
+				}
+			},
+			"required": ["context", "data_context"],
+			"additionalProperties": false
+		}
+	},{
+		"description": "Buscar datos de canal",
+		"method": "get",
+		"path": "/buscarDatoCanal",
+		"params": {
+			"description": "URL params definition",
+			"type": "object",
+			"properties": {
+				"user_id": {"type": "array"},
+				"label": {"type": "array"}
+			},
+			"required": ["user_id", "label"],
+			"additionalProperties": false
+		},
+		"body": null
+	},{
+		"description": "Eliminar datos de canal",
+		"method": "delete",
+		"path": "/eliminarDatoCanal",
+		"params": {
+			"description": "URL params definition",
+			"type": "object",
+			"properties": {
+				"user_id": {"type": "array"},
+				"label": {"type": "array"}
+			},
+			"required": ["user_id", "label"],
+			"additionalProperties": false
+		},
+		"body": null
+	},{
+		"description": "Buscar datos de canal de sesiones historicas completadas",
+		"method": "get",
+		"path": "/buscarDatoCanalCompletados",
+		"params": {
+			"description": "URL params definition",
+			"type": "object",
+			"properties": {
+				"user_id": {"type": "array"},
+				"label": {"type": "array"}
+			},
+			"additionalProperties": false
+		},
+		"body": null
+	}]
+}
