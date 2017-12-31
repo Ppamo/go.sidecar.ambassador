@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func RequestHandler(w http.ResponseWriter, r *http.Request) {
+func requestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello my world!\n")
 	fmt.Printf("=> Handling request\n")
 	r.ParseForm()
@@ -18,7 +18,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartServer(config config.Configuration) error {
-	http.HandleFunc("/", RequestHandler)
+	http.HandleFunc("/", requestHandler)
 	http.ListenAndServe(fmt.Sprintf("%s:%v", config.Server.Host, config.Server.Port), nil)
 	return nil
 }
