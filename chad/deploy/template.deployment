@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+ name: $PROJECTNAME
+ namespace: $NAMESPACE
+spec:
+ replicas: 1
+ template:
+  metadata:
+   labels:
+    app: $PROJECTNAME
+    tier: $NAMESPACE
+  spec:
+   containers:
+    - name: $AUTORIZADORPROJECTNAME
+      image: $REGISTRYHOST/$AUTORIZADORIMAGE
+      ports:
+       - name: http
+         containerPort: 8080
+    - name: $PROJECTNAME
+      image: $REGISTRYHOST/$NAMESPACE/$PROJECTNAME:$VERSION

@@ -5,12 +5,14 @@ BLUE='\e[36m'
 YELLOW='\e[93m'
 RESET='\e[39m'
 APP=chad
-IMAGENAME=${IMAGENAME:=ppamo.cl/chad}
-DOCKERIMAGE="${DOCKERIMAGE:=docker.io/golang:1.9.2-alpine}"
+IMAGENAME=${IMAGENAME:=ppamo.cl/$APP}
+GOIMAGE="${GOIMAGE:=docker.io/golang:1.9.2-alpine}"
 PROJECT=github.com/Ppamo/go.sidecar.ambassador/chad
 BINARYFILE=bin/chad
 BINARYDOCKER=docker/chad
 VERSION=${VERSION:=0.1.0}
+KUBECTL='kubectl'
+KUBEENV=$($KUBECTL config current-context)
 
 if [ -z "$GOPATH" ]
 then
@@ -21,7 +23,7 @@ fi
 usage(){
 	printf "$YELLOW* Usage:
 	build $BLUE[compile|build|run|clean|list]$RESET
-	"
+"
 }
 
 stop(){
@@ -32,6 +34,25 @@ stop(){
 	else
 		printf "$RED- ERROR: No container found$RESET\n"
 	fi
+}
+
+load_config_file(){
+	printf $YELLOW"* Cargando configuracion desde $1\n"$RESET
+	if [ ! -f "$1" ]
+	then
+		printf $RED"- ERROR:"$RESET" Archivo de configuracion \"$1\" no existe\n"
+		exit -1
+	fi
+	for i in $(cat $1)
+	do
+		VARNAME=$(echo $i | awk -F= '{ print $1 }')
+		VARVALUE=$(echo $i | awk -F= '{ print $2 }')
+		if [ -z "${!VARNAME}" ]
+		then
+			export ${VARNAME}=$VARVALUE
+			printf "$GREEN+ $VARNAME"$RESET"=$VARVALUE\n"
+		fi
+	done
 }
 
 sigint_handler(){
@@ -53,7 +74,7 @@ compile(){
 		go get && \
 		CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o \"$BINARYFILE\" ."
 
-	docker run --rm --privileged=true -i -v "$GOPATH:/go" "$DOCKERIMAGE" /bin/sh -c "$CMD"
+	docker run --rm --privileged=true -i -v "$GOPATH:/go" "$GOIMAGE" /bin/sh -c "$CMD"
 	if [ -x $BINARYFILE ]
 	then
 		printf $GREEN"Chad OK!$RESET\n"
@@ -127,16 +148,96 @@ list(){
 	printf $GREEN"Chad OK!$RESET\n"
 }
 
-for command in "$@"
+push(){
+	DST=$2
+	if [ -z "$VERSION" ]
+	then
+		VERSION=$(docker images $IMAGENAME --format "{{.Tag}}" | \
+			grep -v "latest" | \
+			sort | \
+			tail -n 1)
+	fi
+	printf "$YELLOW* Pushing chad image $IMAGENAME:$VERSION $RESET\n"
+	if [ -z "$VERSION" ]
+	then
+		printf $RED"- ERROR: No version found!\n"$RESET
+		exit -1
+	fi
+
+	docker tag $IMAGENAME:$VERSION $DST/$APP:$VERSION && \
+	docker push $DST/$APP:$VERSION
+	if [ $? -eq 0 ]
+	then
+		printf $GREEN"Chad OK!$RESET\n"
+	else
+		printf $RED"Chad Not OK!$RESET\n"
+	fi
+	((INDEX++))
+}
+
+deploy(){
+	REGISTRYHOST=$2
+	DEPLOYMENTPROPERTIES=deploy/app.properties
+	DEPLOYMENTTEMPLATE=deploy/template.deployment
+	printf "$YELLOW* Deploying chad $RESET\n"
+	load_config_file $DEPLOYMENTPROPERTIES
+	if [ -z "$VERSION" ]
+	then
+		VERSION=$(docker images $IMAGENAME --format "{{.Tag}}" | \
+			grep -v "latest" | \
+			sort | \
+			tail -n 1)
+	fi
+	$KUBECTL get namespaces > /dev/null 2>&1
+	if [ $? -ne 0 ]
+	then
+		printf "$RED- ERROR: no se pudo acceder a kubernetes en$GREEN $KUBEENV\n"$RESET
+		exit -1
+	fi
+
+	printf $YELLOW"* Creando archivo deployment\n"$RESET
+	IFS=$'\n'
+	while read line
+	do
+		eval echo \"$line\"
+	done < $DEPLOYMENTTEMPLATE > $DEPLOYMENTTEMPLATE.yaml
+	unset IFS
+
+	printf $YELLOW"* Desplegando proyecto$GREEN $PROJECTNAME$YELLOW a contexto$GREEN $KUBEENV\n"$RESET
+	$KUBECTL get deploy "$PROJECTNAME" --namespace "$NAMESPACE" > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+		$KUBECTL delete -f $DEPLOYMENTTEMPLATE.yaml
+		if [ $? -ne 0 ]
+		then
+			printf "$RED- ERROR: no se pudo eliminar el proyecto\n"$RESET
+			exit -1
+		fi
+	fi
+	$KUBECTL create --validate=false -f $DEPLOYMENTTEMPLATE.yaml
+	if [ $? -ne 0 ]
+	then
+		printf "$RED- ERROR: no se pudo crear el proyecto\n"$RESET
+		exit -1
+	fi
+	printf $GREEN"* Hecho!\n"$RESET
+	((INDEX++))
+}
+
+INDEX=0
+while [ $INDEX -lt $# ]
 do
-	case "$command" in
-		compile)	compile		;;
-		build)		build		;;
-		run)		run		;;
-		clean)		clean		;;
-		list)		list		;;
+	((INDEX++))
+	case ${@:INDEX:1} in
+		compile)	compile			;;
+		build)		build			;;
+		run)		run			;;
+		clean)		clean			;;
+		list)		list			;;
+		push)		push ${@:INDEX}		;;
+		deploy)		deploy ${@:INDEX}	;;
 		*)
-			printf "$RED- ERROR: comando no encontrado$RESET\n"
+			printf $RED"- ERROR: comando \"${@:INDEX:1}\" no reconocido\n"$RESET
 			usage
 			exit -1
 	esac
