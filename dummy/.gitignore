@@ -1,0 +1,3 @@
+bin
+docker/dummy
+template.deployment.yaml
