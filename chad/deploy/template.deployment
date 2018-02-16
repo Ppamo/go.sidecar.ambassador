@@ -12,10 +12,46 @@ spec:
     tier: $NAMESPACE
   spec:
    containers:
-    - name: $AUTORIZADORPROJECTNAME
-      image: $REGISTRYHOST/$AUTORIZADORIMAGE
+    - name: $PROJECTNAME
+      image: $REGISTRYHOST/$NAMESPACE/$PROJECTNAME:$VERSION
       ports:
        - name: http
          containerPort: 8080
-    - name: $PROJECTNAME
-      image: $REGISTRYHOST/$NAMESPACE/$PROJECTNAME:$VERSION
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-$PROJECTNAME
+  namespace: $NAMESPACE
+  labels:
+    app: $PROJECTNAME-service
+    tier: micro-$PROJECTNAME
+spec:
+  type: NodePort
+  ports:
+   - name: http
+     protocol: TCP
+     port: 8080
+     nodePort: 30001
+  selector:
+    app: $PROJECTNAME-service
+    tier: micro-$PROJECTNAME
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-$PROJECTNAME-interno
+  namespace: $NAMESPACE
+  labels:
+    app: $PROJECTNAME-service
+    tier: micro-$PROJECTNAME
+spec:
+ type: ClusterIP
+ selector:
+  app: $PROJECTNAME-service
+  tier: micro-$PROJECTNAME
+ ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+    targetPort: 8080

@@ -7,9 +7,9 @@ RESET='\e[39m'
 APP=chad
 IMAGENAME=${IMAGENAME:=ppamo.cl/$APP}
 GOIMAGE="${GOIMAGE:=docker.io/golang:1.9.2-alpine}"
-PROJECT=github.com/Ppamo/go.sidecar.ambassador/chad
-BINARYFILE=bin/chad
-BINARYDOCKER=docker/chad
+PROJECT=github.com/Ppamo/go.sidecar.ambassador/$APP
+BINARYFILE=bin/$APP
+BINARYDOCKER=docker/$APP
 VERSION=${VERSION:=0.1.0}
 KUBECTL='kubectl'
 KUBEENV=$($KUBECTL config current-context)
@@ -61,7 +61,7 @@ sigint_handler(){
 }
 
 compile(){
-	printf $YELLOW"* Compiling chad$BLUE\n"
+	printf $YELLOW"* Compiling $APP$BLUE\n"
 	rm -f $BINARYFILE
 	OS=$(uname -o)
 	if [ "$OS" == "Cygwin" ]
@@ -77,18 +77,19 @@ compile(){
 	docker run --rm --privileged=true -i -v "$GOPATH:/go" "$GOIMAGE" /bin/sh -c "$CMD"
 	if [ -x $BINARYFILE ]
 	then
-		printf $GREEN"Chad OK!$RESET\n"
+		printf $GREEN"$APP OK!$RESET\n"
 	else
-		printf $RED"Chad Not OK!$RESET\n"
+		printf $RED"$APP Not OK!$RESET\n"
+		exit -1
 	fi
 }
 
 build(){
-	printf $YELLOW"* Creating chad\n"
+	printf $YELLOW"* Creating $APP\n"
 	rm -f $BINARYDOCKER
 	if [ ! -x $BINARYFILE ]
 	then
-		printf $RED"+ Chad not found, compile first, OK!$RESET\n"
+		printf $RED"+ $APP not found, compile first, OK!$RESET\n"
 		exit -2
 	fi
 	cp "$BINARYFILE" docker/
@@ -102,9 +103,9 @@ build(){
 	docker build -t $IMAGENAME:$VERSION docker/
 	if [ $? -eq 0 ]
 	then
-		printf $GREEN"Chad OK!$RESET\n"
+		printf $GREEN"$APP OK!$RESET\n"
 	else
-		printf $RED"Chad Not OK!$RESET\n"
+		printf $RED"$APP Not OK!$RESET\n"
 	fi
 }
 
@@ -126,26 +127,26 @@ run(){
 }
 
 clean(){
-	printf "$YELLOW* Cleaning chad! $RESET\n"
+	printf "$YELLOW* Cleaning $APP! $RESET\n"
 	printf "$YELLOW+ Deleting $BINARYFILE$RESET\n"
 	rm -f $BINARYFILE
 	printf "$YELLOW+ Deleting $BINARYDOCKER$RESET\n"
 	rm -f $BINARYDOCKER
 	printf "$YELLOW+ Stopping app $RESET\n"
 	stop
-	TAGS=$(docker images ppamo.cl/chad --format "{{.Tag}}")
+	TAGS=$(docker images ppamo.cl/$APP --format "{{.Tag}}")
 	for TAG in $TAGS
 	do
 		printf "$YELLOW+ Deleting $IMAGENAME:$TAG$RESET\n"
 		docker rmi $IMAGENAME:$TAG
 	done
-	printf $GREEN"Chad OK!$RESET\n"
+	printf $GREEN"$APP OK!$RESET\n"
 }
 
 list(){
-	printf "$YELLOW* Listing chad images $RESET\n"
+	printf "$YELLOW* Listing $APP images $RESET\n"
 	docker images $IMAGENAME --format "- {{.Repository}}:{{.Tag}}\t{{.CreatedAt}}\t{{.Size}}"
-	printf $GREEN"Chad OK!$RESET\n"
+	printf $GREEN"$APP OK!$RESET\n"
 }
 
 push(){
@@ -157,7 +158,7 @@ push(){
 			sort | \
 			tail -n 1)
 	fi
-	printf "$YELLOW* Pushing chad image $IMAGENAME:$VERSION $RESET\n"
+	printf "$YELLOW* Pushing $APP image $IMAGENAME:$VERSION $RESET\n"
 	if [ -z "$VERSION" ]
 	then
 		printf $RED"- ERROR: No version found!\n"$RESET
@@ -168,9 +169,9 @@ push(){
 	docker push $DST/$APP:$VERSION
 	if [ $? -eq 0 ]
 	then
-		printf $GREEN"Chad OK!$RESET\n"
+		printf $GREEN"$APP OK!$RESET\n"
 	else
-		printf $RED"Chad Not OK!$RESET\n"
+		printf $RED"$APP Not OK!$RESET\n"
 	fi
 	((INDEX++))
 }
@@ -179,7 +180,7 @@ deploy(){
 	REGISTRYHOST=$2
 	DEPLOYMENTPROPERTIES=deploy/app.properties
 	DEPLOYMENTTEMPLATE=deploy/template.deployment
-	printf "$YELLOW* Deploying chad $RESET\n"
+	printf "$YELLOW* Deploying $APP $RESET\n"
 	load_config_file $DEPLOYMENTPROPERTIES
 	if [ -z "$VERSION" ]
 	then
@@ -207,6 +208,7 @@ deploy(){
 	$KUBECTL get deploy "$PROJECTNAME" --namespace "$NAMESPACE" > /dev/null 2>&1
 	if [ $? -eq 0 ]
 	then
+		$KUBECTL delete --ignore-not-found=true -f $DEPLOYMENTTEMPLATE.yaml
 		$KUBECTL delete -f $DEPLOYMENTTEMPLATE.yaml
 		if [ $? -ne 0 ]
 		then
