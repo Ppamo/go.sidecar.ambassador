@@ -1,0 +1,82 @@
+{
+	"enabled": [{
+		"description": "simple get",
+		"method": "get",
+		"path": "/",
+		"params": null,
+		"body": null
+	},{
+		"description": "simple get with params",
+		"method": "get",
+		"path": "/data",
+		"params": {
+			"description": "url params definition",
+			"type": "object",
+			"properties": {
+				"user": {"type": "array"},
+				"id": {"type": "array"}
+			},
+			"required": ["user", "id"],
+			"additionalProperties": false
+		},
+		"body": null
+	},{
+		"description": "simple put",
+		"method": "put",
+		"path": "/data",
+		"params": null,
+		"body": {
+			"$schema": "http://json-schema.org/draft-06/schema#",
+			"title": "body post",
+			"description": "body post",
+			"type": "object",
+			"properties": {
+				"id": { "type": "number", "minLength": 1 },
+				"name": { "type": "string", "minLength": 1 }
+			},
+			"required": ["id", "name"],
+			"additionalProperties": false
+		}
+	},{
+		"description": "complex post",
+		"method": "post",
+		"path": "/data",
+		"params": null,
+		"body": {
+			"$schema": "http://json-schema.org/draft-06/schema#",
+			"title": "body post",
+			"description": "body post",
+			"type": "object",
+			"properties": {
+				"context": {
+					"description": "context definition",
+					"type": "object",
+					"properties": {
+						"channel_id": { "type": "string", "minLength": 1 },
+						"application": { "type": "string", "minLength": 1 },
+						"transaction_id": { "type": "string", "minLength": 1 },
+						"timestamp": { "type": "string", "minLength": 1 }
+					},
+					"required": ["channel_id", "application", "transaction_id", "timestamp"],
+					"additionalProperties": false
+				},
+				"data_context": {
+					"description": "data_context definition",
+					"type": "object",
+					"properties": {
+						"user_id": { "type": "string", "minLength": 1 },
+						"label": { "type": "string", "minLength": 1 },
+						"session_status": { "type": "string" },
+						"current_counter": { "type": "number" },
+						"duration": { "type": "number", "minimum": 1 },
+						"flow_detail": { "type": "object" }
+					},
+					"required": ["user_id", "label", "session_status", "current_counter", "duration", "flow_detail"],
+					"additionalProperties": false
+				}
+			},
+			"required": ["context", "data_context"],
+			"additionalProperties": false
+		}
+	}]
+}
