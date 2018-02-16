@@ -9,7 +9,7 @@ var server *http.Server
 
 func main() {
 	fmt.Printf("=> starting chad process at port 8081\n")
-	server = &http.Server{Addr: "localhost:8081"}
+	server = &http.Server{Addr: "0.0.0.0:8081"}
 	http.HandleFunc("/", requestHandler)
 	e := server.ListenAndServe()
 	if e != nil {
@@ -18,6 +18,5 @@ func main() {
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("=> ok!\n")
 	fmt.Fprintf(w, "{\"status\": \"ok\"}")
 }

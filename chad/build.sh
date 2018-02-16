@@ -127,14 +127,17 @@ list(){
 	printf $GREEN"Chad OK!$RESET\n"
 }
 
-case $1 in
-	compile)	compile		;;
-	build)		build		;;
-	run)		run		;;
-	clean)		clean		;;
-	list)		list		;;
-	*)
-		printf "$RED- ERROR: comando no encontrado$RESET\n"
-		usage
-		exit -1
-esac
+for command in "$@"
+do
+	case "$command" in
+		compile)	compile		;;
+		build)		build		;;
+		run)		run		;;
+		clean)		clean		;;
+		list)		list		;;
+		*)
+			printf "$RED- ERROR: comando no encontrado$RESET\n"
+			usage
+			exit -1
+	esac
+done
