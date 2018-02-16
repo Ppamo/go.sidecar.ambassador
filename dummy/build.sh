@@ -210,7 +210,7 @@ deploy(){
 	$KUBECTL get deploy "$PROJECTNAME" --namespace "$NAMESPACE" > /dev/null 2>&1
 	if [ $? -eq 0 ]
 	then
-		$KUBECTL delete -f $DEPLOYMENTTEMPLATE.yaml
+		$KUBECTL delete --ignore-not-found=true -f $DEPLOYMENTTEMPLATE.yaml
 		if [ $? -ne 0 ]
 		then
 			printf "$RED- ERROR: no se pudo eliminar el proyecto\n"$RESET
