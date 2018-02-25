@@ -1,4 +1,4 @@
 FROM scratch
 ADD chad /
-EXPOSE 8081
+EXPOSE 8080
 CMD ["/chad"]
