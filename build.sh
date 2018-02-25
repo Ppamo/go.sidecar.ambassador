@@ -1,16 +1,34 @@
 #!/bin/bash
-DOCKERIMAGE="${DOCKERIMAGE:-docker.io/golang:1.9.2-alpine}"
-PROJECT=$1
-BINARYFILE=$2
+APP="sidecar.ambassador"
+source "$(git rev-parse --show-toplevel)/build_lib.sh"
 
-OS=$(uname -o)
-if [ "$OS" == "Cygwin" ]
+usage(){
+	printf "$YELLOW* Usage:
+	build $BLUE[compile|build|run|clean|list]$RESET
+"
+}
+
+if [ $# -eq 0 ]
 then
-	GOPATH=${GOPATH#/cygdrive}
+	usage
+	exit 0
 fi
 
-CMD="cd \"src/$PROJECT\" && \
-	go get && \
-	CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o \"$BINARYFILE\" ."
-
-docker run --rm --privileged=true -i -v "$GOPATH:/go" "$DOCKERIMAGE" /bin/sh -c "$CMD"
+INDEX=0
+while [ $INDEX -lt $# ]
+do
+	((INDEX++))
+	case ${@:INDEX:1} in
+		compile)	compile			;;
+		build)		build			;;
+		run)		run			;;
+		clean)		clean			;;
+		list)		list			;;
+		push)		push ${@:INDEX}		;;
+		deploy)		deploy ${@:INDEX}	;;
+		*)
+			printf $RED"- ERROR: comando \"${@:INDEX:1}\" no reconocido\n"$RESET
+			usage
+			exit -1
+	esac
+done
