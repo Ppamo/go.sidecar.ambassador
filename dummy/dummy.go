@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,7 +21,7 @@ func main() {
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
-	if strings.EqualFold(r.Method, "get") && strings.EqualFold(r.RequestURI, "/"){
+	if strings.EqualFold(r.Method, "get") && strings.EqualFold(r.RequestURI, "/") {
 		fmt.Fprintf(w, "{\"status\": \"ok\"}")
 	} else if strings.EqualFold(r.Method, "get") &&
 		strings.EqualFold(r.RequestURI, "/serviceInfo?item=validation") {
@@ -34,7 +35,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	} else if strings.EqualFold(r.Method, "get") &&
 		strings.EqualFold(r.RequestURI, "/serviceInfo?item=quit") {
 		fmt.Printf("+ quiting!")
-		server.Shutdown(nil)
+		server.Shutdown(context.Background())
 	} else {
 		fmt.Printf("- call with path %s\n", r.RequestURI)
 		fmt.Fprintf(w, "{\"hello\": \"world\"}\n")
