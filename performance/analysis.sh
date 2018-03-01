@@ -1,4 +1,6 @@
 #!/bin/bash
+export LC_NUMERIC="en_US.UTF-8"
+
 APP=nginx
 IMAGEBASE=nginx:1.13.9-alpine
 NGINXPORT=1080
@@ -35,6 +37,23 @@ do_test(){
 	get_results "$BASEDATA" "$DATA"
 }
 
+print_diff(){
+	DIFF=$(bc <<< "scale=9;(($1/$2)*100)-100")
+	POSITIVE=$(echo "$DIFF>=0" | bc -l)
+	if [ "$INVERTED" = "1" ]
+	then
+		[ ! $POSITIVE ]
+		POSITIVE=$?
+	fi
+	if [ $POSITIVE -eq 1 ]
+	then
+		COLOR=$GREEN
+	else
+		COLOR=$RED
+	fi
+	printf "\t%.20s: $COLOR%.3f \n$RESET" "$3" $DIFF
+}
+
 get_results(){
 	BASETOTAL=$(echo "$1" | grep "Total:" | awk '{ print $2 }')
 	BASESLOWEST=$(echo "$1" | grep "Slowest:" | awk '{ print $2 }')
@@ -47,23 +66,23 @@ get_results(){
 	FASTEST=$(echo "$2" | grep "Fastest:" | awk '{ print $2 }')
 	AVERAGE=$(echo "$2" | grep "Average:" | awk '{ print $2 }')
 	TPS=$(echo "$2" | grep "Requests/sec:" | awk '{ print $2 }')
-	
-	printf "Results:
-TOTAL: $BASETOTAL > $TOTAL
-SLOWEST: $BASESLOWEST > $SLOWEST
-FASTEST: $BASEFASTEST > $FASTEST
-AVERAGE: $BASEAVERAGE > $AVERAGE
-TPS: $BASETPS > $TPS
-"
+
+	printf "\nResults:\n"
+	print_diff $BASETOTAL $TOTAL "Spent time"
+	INVERTED=1 print_diff $BASESLOWEST $SLOWEST "Slowest response"
+	print_diff $BASEFASTEST $FASTEST "Fastest response"
+	print_diff $BASEAVERAGE $AVERAGE "Average response"
+	print_diff $BASETPS $TPS "Responses per second"
 }
 
 printf $YELLOW"+ Starting nginx\n"$RESET
 start_nginx
 printf $YELLOW"+ Starting dummy\n"$RESET
 start_dummy
-printf $YELLOW"+ Testing\n"$RESET
-do_test 100 500 http://localhost:$NGINXPORT http://localhost:8081
+printf $YELLOW"+ Testing scenario 1\n"$RESET
+RESULTS=$(do_test 100 500 http://localhost:$NGINXPORT http://localhost:8081)
 printf -- $YELLOW"- Stoping nginx\n"$RESET
 stop_nginx
 printf -- $YELLOW"- Stoping dummy\n"$RESET
 stop_dummy
+printf "$RESULTS\n"
