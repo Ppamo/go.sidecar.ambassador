@@ -40,10 +40,9 @@ do_test(){
 print_diff(){
 	DIFF=$(bc <<< "scale=9;(($1/$2)*100)-100")
 	POSITIVE=$(echo "$DIFF>=0" | bc -l)
-	if [ "$INVERTED" = "1" ]
+	if [ "$NEGATIVE" = "1" ]
 	then
-		[ ! $POSITIVE ]
-		POSITIVE=$?
+		POSITIVE=$((POSITIVE-1))
 	fi
 	if [ $POSITIVE -eq 1 ]
 	then
@@ -51,7 +50,7 @@ print_diff(){
 	else
 		COLOR=$RED
 	fi
-	printf "\t%.20s: $COLOR%.3f \n$RESET" "$3" $DIFF
+	printf "\t%-21s: $COLOR%+9.4f \n$RESET" "$3" $DIFF
 }
 
 get_results(){
@@ -68,10 +67,10 @@ get_results(){
 	TPS=$(echo "$2" | grep "Requests/sec:" | awk '{ print $2 }')
 
 	printf "\nResults:\n"
-	print_diff $BASETOTAL $TOTAL "Spent time"
-	INVERTED=1 print_diff $BASESLOWEST $SLOWEST "Slowest response"
-	print_diff $BASEFASTEST $FASTEST "Fastest response"
-	print_diff $BASEAVERAGE $AVERAGE "Average response"
+	NEGATIVE=1 print_diff $BASETOTAL $TOTAL "Spent time"
+	NEGATIVE=1 print_diff $BASESLOWEST $SLOWEST "Slowest response"
+	NEGATIVE=1 print_diff $BASEFASTEST $FASTEST "Fastest response"
+	NEGATIVE=1 print_diff $BASEAVERAGE $AVERAGE "Average response"
 	print_diff $BASETPS $TPS "Responses per second"
 }
 
@@ -85,4 +84,4 @@ printf -- $YELLOW"- Stoping nginx\n"$RESET
 stop_nginx
 printf -- $YELLOW"- Stoping dummy\n"$RESET
 stop_dummy
-printf "$RESULTS\n"
+echo "$RESULTS"
