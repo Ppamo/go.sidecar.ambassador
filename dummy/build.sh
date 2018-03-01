@@ -22,6 +22,7 @@ do
 	case ${@:INDEX:1} in
 		compile)	compile			;;
 		build)		build			;;
+		launch)		launch			;;
 		run)		run			;;
 		clean)		clean			;;
 		list)		list			;;

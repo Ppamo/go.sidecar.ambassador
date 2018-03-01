@@ -22,6 +22,7 @@ do
 		compile)	compile			;;
 		build)		build			;;
 		run)		run			;;
+		launch)		launch			;;
 		clean)		clean			;;
 		list)		list			;;
 		push)		push ${@:INDEX}		;;

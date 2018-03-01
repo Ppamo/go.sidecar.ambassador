@@ -123,6 +123,26 @@ run(){
 	exit 0
 }
 
+launch(){
+	printf "$YELLOW* Getting container $IMAGENAME $RESET\n"
+	VERSION=$(docker images $IMAGENAME --format "{{.Tag}}" | \
+		grep -v "latest" | \
+		sort | \
+		tail -n 1)
+	if [ "$VERSION" ]
+	then
+		printf "$YELLOW+ Launching $IMAGENAME:$VERSION $RESET\n"
+		docker run -d -p $PORT:$PORT --name "$APP" -i $IMAGENAME:$VERSION > /dev/null
+		if [ $? -ne 0 ]
+		then
+			printf "$RED- ERROR: fail to launch $APP, OK! $RESET\n"
+			exit -1
+		fi
+	else
+		printf "$RED- ERROR: no image found, please compile and build first, OK! $RESET\n"
+	fi
+}
+
 clean(){
 	printf "$YELLOW* Cleaning $APP! $RESET\n"
 	printf "$YELLOW+ Deleting $BINARYFILE$RESET\n"
