@@ -11,7 +11,7 @@ import (
 var server *http.Server
 
 func main() {
-	fmt.Printf("=> starting chad process at port 8081\n")
+	fmt.Printf("=> starting dummy process at port 8081\n")
 	server = &http.Server{Addr: "0.0.0.0:8081"}
 	http.HandleFunc("/", requestHandler)
 	e := server.ListenAndServe()
