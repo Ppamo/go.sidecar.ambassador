@@ -162,7 +162,7 @@ clean(){
 
 list(){
 	printf "$YELLOW* Listing $APP images $RESET\n"
-	docker images $IMAGENAME --format "- {{printf \"%-35s\" (printf \"%.34s\" (printf \"%s:%s\" .Repository .Tag))}}{{printf \"%s\" .CreatedAt}}\t{{.Size}}"
+	docker images $IMAGENAME --format "- {{printf \"%-35s\" (printf \"%.34s\" (printf \"%s:%s\" .Repository .Tag))}}{{printf \"%.20s\" .CreatedAt}}\t{{.Size}}"
 	printf $GREEN"$APP OK!$RESET\n"
 }
 
