@@ -2,10 +2,12 @@
 export LC_NUMERIC="en_US.UTF-8"
 
 APP=nginx
-IMAGEBASE=nginx:1.13.9-alpine
+IMAGEBASE=nginx:alpine
 NGINXPORT=1080
 BASEPATH=$(git rev-parse --show-toplevel)
 source "$BASEPATH/build_lib.sh"
+BINAB=/cygdrive/c/apache24/bin/ab
+DOCKERHOST="192.168.99.100"
 
 usage(){
 	printf "$YELLOW* Usage:
@@ -31,47 +33,49 @@ stop_dummy(){
 }
 
 do_test(){
-	go get github.com/rakyll/hey > /dev/null 2>&1
-	BASEDATA=$(hey -c $1 -n $2 $3)
-	DATA=$(hey -c $1 -n $2 $4)
+	BASEDATA=$($BINAB -c $1 -n $2 $3 2>&1)
+	DATA=$($BINAB -c $1 -n $2 $4 2>&1)
 	get_results "$BASEDATA" "$DATA"
 }
 
 print_diff(){
-	DIFF=$(bc <<< "scale=9;(($1/$2)*100)-100")
+	X=$1 && Y=$2
+	DIFF=$(bc <<< "scale=9;(($Y/$X)*100)-100")
 	POSITIVE=$(echo "$DIFF>=0" | bc -l)
 	if [ "$NEGATIVE" = "1" ]
 	then
-		POSITIVE=$((POSITIVE-1))
+		POSITIVE=$((POSITIVE-2))
 	fi
-	if [ $POSITIVE -eq 1 ]
+	if [ $POSITIVE -eq 1 -o $POSITIVE -eq -2 ]
 	then
 		COLOR=$GREEN
 	else
 		COLOR=$RED
 	fi
-	printf "\t%-21s: $COLOR%+9.4f \n$RESET" "$3" $DIFF
+	printf "\t%-21s: $COLOR%+9.4f$RESET   [$1/$2]\n" "$3" $DIFF
 }
 
 get_results(){
-	BASETOTAL=$(echo "$1" | grep "Total:" | awk '{ print $2 }')
-	BASESLOWEST=$(echo "$1" | grep "Slowest:" | awk '{ print $2 }')
-	BASEFASTEST=$(echo "$1" | grep "Fastest:" | awk '{ print $2 }')
-	BASEAVERAGE=$(echo "$1" | grep "Average:" | awk '{ print $2 }')
-	BASETPS=$(echo "$1" | grep "Requests/sec:" | awk '{ print $2 }')
+	BASESPENTTIME=$(echo "$1" | grep "Time taken for tests" | awk '{ print $5 }')
+	BASEFAILED=$(echo "$1" | grep "Failed requests" | awk '{ print $3 }')
+	BASERPS=$(echo "$1" | grep "Requests per second" | awk '{ print $4 }')
+	BASETPR=$(echo "$1" | grep "Time per request:" | head -n 1 | awk '{ print $4 }')
+	BASECTPR=$(echo "$1" | grep "Time per request:" | tail -n 1 | awk '{ print $4 }')
+	BASETRANSFERRATE=$(echo "$1" | grep "Transfer rate:" | head -n 1 | awk '{ print $3 }')
 
-	TOTAL=$(echo "$2" | grep "Total:" | awk '{ print $2 }')
-	SLOWEST=$(echo "$2" | grep "Slowest:" | awk '{ print $2 }')
-	FASTEST=$(echo "$2" | grep "Fastest:" | awk '{ print $2 }')
-	AVERAGE=$(echo "$2" | grep "Average:" | awk '{ print $2 }')
-	TPS=$(echo "$2" | grep "Requests/sec:" | awk '{ print $2 }')
+	SPENTTIME=$(echo "$2" | grep "Time taken for tests" | awk '{ print $5 }')
+	FAILED=$(echo "$2" | grep "Failed requests" | awk '{ print $3 }')
+	RPS=$(echo "$2" | grep "Requests per second" | awk '{ print $4 }')
+	TPR=$(echo "$2" | grep "Time per request:" | head -n 1 | awk '{ print $4 }')
+	CTPR=$(echo "$2" | grep "Time per request:" | tail -n 1 | awk '{ print $4 }')
+	TRANSFERRATE=$(echo "$2" | grep "Transfer rate:" | head -n 1 | awk '{ print $3 }')
 
 	printf "\nResults:\n"
-	NEGATIVE=1 print_diff $BASETOTAL $TOTAL "Spent time"
-	NEGATIVE=1 print_diff $BASESLOWEST $SLOWEST "Slowest response"
-	NEGATIVE=1 print_diff $BASEFASTEST $FASTEST "Fastest response"
-	NEGATIVE=1 print_diff $BASEAVERAGE $AVERAGE "Average response"
-	print_diff $BASETPS $TPS "Responses per second"
+	NEGATIVE=1 print_diff $BASESPENTTIME $SPENTTIME "Spent time"
+	# print_diff "$BASEFAILED" "$FAILED" "Failed requests"
+	print_diff $BASERPS $RPS "Requests per second"
+	NEGATIVE=1 print_diff $BASETPR $TPR "Time per request"
+	print_diff $BASETRANSFERRATE $TRANSFERRATE "Transfer rate"
 }
 
 printf $YELLOW"+ Starting nginx\n"$RESET
@@ -79,9 +83,18 @@ start_nginx
 printf $YELLOW"+ Starting dummy\n"$RESET
 start_dummy
 printf $YELLOW"+ Testing scenario 1\n"$RESET
-RESULTS=$(do_test 100 500 http://localhost:$NGINXPORT http://localhost:8081)
+RESULTS_TEST01=$(do_test 500 2500 http://$DOCKERHOST:$NGINXPORT/ http://$DOCKERHOST:8081/)
+printf $YELLOW"+ Testing scenario 2\n"$RESET
+RESULTS_TEST02=$(do_test 1000 5000 http://$DOCKERHOST:$NGINXPORT/ http://$DOCKERHOST:8081/)
+printf $YELLOW"+ Testing scenario 3\n"$RESET
+RESULTS_TEST03=$(do_test 1500 7500 http://$DOCKERHOST:$NGINXPORT/ http://$DOCKERHOST:8081/)
 printf -- $YELLOW"- Stoping nginx\n"$RESET
 stop_nginx
 printf -- $YELLOW"- Stoping dummy\n"$RESET
 stop_dummy
-echo "$RESULTS"
+printf -- $BLUE"- Scenario 01\n"$RESET
+echo "$RESULTS_TEST01"
+printf -- $BLUE"- Scenario 02\n"$RESET
+echo "$RESULTS_TEST02"
+printf -- $BLUE"- Scenario 03\n"$RESET
+echo "$RESULTS_TEST03"
