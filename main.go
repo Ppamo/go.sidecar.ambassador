@@ -1,16 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Ppamo/go.sidecar.ambassador/config"
 	"github.com/Ppamo/go.sidecar.ambassador/server"
+	"log"
 )
 
 func main() {
-	config, e := config.LoadConfig("config/config_test.json")
+	config, e := config.LoadConfig("config.json")
 	if e != nil {
-		fmt.Printf("Error generating conf\n%v\n", e)
+		log.Fatalf("- Error loading conf\n%v\n", e)
+		panic(e)
 	}
-	fmt.Printf("=> Starting server at %s:%v\n", config.Server.Host, config.Server.Port)
-	server.StartServer(config)
+	e = server.StartServer(config)
+	if e != nil {
+		log.Fatalf("- Error iniciando servicio de traduccion\n%v\n", e)
+	}
 }
