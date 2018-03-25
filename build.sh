@@ -25,7 +25,10 @@ do
 			DOCKERCOPYFILES="config/config.json" \
 			build
 			;;
-		run)		run			;;
+		run)
+			DOCKERENV="-e SERVERPORT=8080" \
+			run
+			;;
 		clean)		clean			;;
 		list)		list			;;
 		push)		push ${@:INDEX}		;;
