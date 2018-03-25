@@ -21,7 +21,10 @@ do
 	((INDEX++))
 	case ${@:INDEX:1} in
 		compile)	compile			;;
-		build)		build			;;
+		build)
+			DOCKERCOPYFILES="resources/properties.json resources/validation.json" \
+			build
+			;;
 		launch)		launch			;;
 		run)		run			;;
 		clean)		clean			;;

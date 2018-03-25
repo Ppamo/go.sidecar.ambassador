@@ -69,9 +69,11 @@ compile(){
 
 	CMD="cd \"src/$PROJECT\" && \
 		go get && \
+		GOROOT=/usr/local/go \
 		CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o \"$BINARYFILE\" ."
 
-	docker run --rm --privileged=true -i -v "$GOPATH:/go" "$GOIMAGE" /bin/sh -c "$CMD"
+	docker run --rm --privileged=true -i \
+		-v "$GOPATH:/go" "$GOIMAGE" /bin/sh -c "$CMD"
 	if [ -x $BINARYFILE ]
 	then
 		printf $GREEN"$APP OK!$RESET\n"
@@ -92,7 +94,7 @@ build(){
 	cp "$BINARYFILE" $BINARYDOCKER
 	if [ "$DOCKERCOPYFILES" ]
 	then
-		cp --force "$DOCKERCOPYFILES" docker/
+		cp --force $DOCKERCOPYFILES docker/
 	fi
 	docker images $IMAGENAME --format "{{.Tag}}" | grep "$VERSION" > /dev/null
 	if [ $? -eq 0 ]

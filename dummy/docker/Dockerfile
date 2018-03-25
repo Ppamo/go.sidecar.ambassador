@@ -1,4 +1,4 @@
 FROM scratch
-COPY dummy validation.rules.json /
+COPY dummy properties.json validation.json /
 EXPOSE 8081
 CMD ["/dummy"]
