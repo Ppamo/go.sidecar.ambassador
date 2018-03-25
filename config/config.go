@@ -24,7 +24,7 @@ type HostConfig struct {
 	ServiceInfoUrl string `json:"serviceInfoUrl" env:"SERVICEINFO"`
 }
 
-func setValues(item interface{}) {
+func setValues(item interface{}) error {
 	var stringVal string
 	rt := reflect.TypeOf(item)
 	rv := reflect.ValueOf(item)
@@ -58,11 +58,6 @@ func setValues(item interface{}) {
 			}
 		}
 	}
-}
-
-func setConfigValues(config *Configuration) error {
-	setValues(config.Server)
-	setValues(config.Host)
 	return nil
 }
 
@@ -80,6 +75,6 @@ func LoadConfig(configPath string) error {
 		log.Fatalf("- Error parsing config json\n%v\n", e)
 		panic(e)
 	}
-	e = setConfigValues(&config)
+	e = setValues(config)
 	return e
 }
