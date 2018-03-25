@@ -7,12 +7,12 @@ import (
 )
 
 func main() {
-	config, e := config.LoadConfig("config.json")
+	e := config.LoadConfig("config.json")
 	if e != nil {
 		log.Fatalf("- Error loading conf\n%v\n", e)
 		panic(e)
 	}
-	e = server.StartServer(config)
+	e = server.StartServer()
 	if e != nil {
 		log.Fatalf("- Error iniciando servicio de traduccion\n%v\n", e)
 	}
