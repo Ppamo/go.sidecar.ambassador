@@ -1,7 +1,7 @@
 #!/bin/bash
 APP=dummy
 PORT=8081
-source "$(git rev-parse --show-toplevel)/build_lib.sh"
+source "$(git rev-parse --show-toplevel)/lib/build_lib.sh"
 
 usage(){
 	printf "$YELLOW* Usage:

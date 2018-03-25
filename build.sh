@@ -1,6 +1,7 @@
 #!/bin/bash
 APP="sidecar.ambassador"
-source "$(git rev-parse --show-toplevel)/build_lib.sh"
+PROJECT=github.com/Ppamo/go.sidecar.ambassador
+source "$(git rev-parse --show-toplevel)/lib/build_lib.sh"
 
 usage(){
 	printf "$YELLOW* Usage:
@@ -20,7 +21,10 @@ do
 	((INDEX++))
 	case ${@:INDEX:1} in
 		compile)	compile			;;
-		build)		build			;;
+		build)
+			DOCKERCOPYFILES="config/config.json" \
+			build
+			;;
 		run)		run			;;
 		clean)		clean			;;
 		list)		list			;;
