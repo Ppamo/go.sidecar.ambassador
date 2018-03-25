@@ -15,7 +15,7 @@ GREEN='\e[92m'
 BLUE='\e[36m'
 YELLOW='\e[93m'
 RESET='\e[39m'
-PROJECT=github.com/Ppamo/go.sidecar.ambassador/$APP
+PROJECT=${PROJECT:=github.com/Ppamo/go.sidecar.ambassador/$APP}
 IMAGENAME=${IMAGENAME:=ppamo.cl/$APP}
 GOIMAGE="${GOIMAGE:=docker.io/golang:1.9.2-alpine}"
 BINARYFILE=bin/$APP
@@ -90,6 +90,10 @@ build(){
 		exit -2
 	fi
 	cp "$BINARYFILE" $BINARYDOCKER
+	if [ "$DOCKERCOPYFILES" ]
+	then
+		cp --force "$DOCKERCOPYFILES" docker/
+	fi
 	docker images $IMAGENAME --format "{{.Tag}}" | grep "$VERSION" > /dev/null
 	if [ $? -eq 0 ]
 	then
@@ -103,6 +107,7 @@ build(){
 		printf $GREEN"$APP OK!$RESET\n"
 	else
 		printf $RED"$APP Not OK!$RESET\n"
+		exit -1
 	fi
 }
 
