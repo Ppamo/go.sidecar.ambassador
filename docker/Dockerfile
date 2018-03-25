@@ -1,3 +1,3 @@
 FROM scratch
-ADD sidecar.ambassador /
+ADD sidecar.ambassador config.json /
 CMD ["/sidecar.ambassador"]

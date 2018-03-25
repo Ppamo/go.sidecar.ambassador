@@ -2,7 +2,9 @@
 *.swp
 
 # specific binaries
+bin
 docker/sidecar.ambassador
+docker/config.json
 
 # Test binary, build with `go test -c`
 *.test
