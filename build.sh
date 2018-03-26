@@ -26,7 +26,7 @@ do
 			build
 			;;
 		run)
-			DOCKERENV="-e SERVERPORT=8080" \
+			DOCKERENV="-e SERVERPORT=8080 -e DESTINATION=http://172.17.0.2:8081" \
 			run
 			;;
 		clean)		clean			;;
