@@ -1,9 +1,9 @@
 {
 	"properties": [{
-		"key": "service.name",
+		"key": "SERVICENAME",
 		"value": "ms-mensajeria"
 	},{
-		"key": "service.prefixURL",
+		"key": "SERVICEURLPREFIX",
 		"value": "/channelActivityHistory/v1.0/mensajeria"
 	}]
 }
