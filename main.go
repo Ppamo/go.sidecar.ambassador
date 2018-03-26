@@ -9,11 +9,10 @@ import (
 func main() {
 	e := config.LoadConfig("config.json")
 	if e != nil {
-		log.Fatalf("- Error loading conf\n%v\n", e)
-		panic(e)
+		log.Panicf("- ERROR: Fail to load configuration\n%v\n", e)
 	}
 	e = server.StartServer()
 	if e != nil {
-		log.Fatalf("- Error iniciando servicio de traduccion\n%v\n", e)
+		log.Panicf("- ERROR: Starting validation service\n%v\n", e)
 	}
 }
