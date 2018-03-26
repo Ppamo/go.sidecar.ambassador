@@ -1,11 +1,13 @@
 {
 	"server": {
 		"host": "0.0.0.0",
-		"port": 8080
+		"port": 8080,
+		"requestRetry": 20
 	},
 	"host": {
 		"destination": "http://localhost:8081",
 		"urlPrefix": "/channelActivityHistory/v1.0/contextodatos",
-		"serviceInfoURL": "/serviceInfo?item=validation"
+		"hostRules": "/serviceInfo?item=validation",
+		"hostProperties": "/serviceInfo?item=properties"
 	}
 }

@@ -4,9 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"reflect"
+	"strconv"
+	"time"
 )
+
+type HostProperties struct {
+	Items []HostProperty `json:"properties"`
+}
+
+type HostProperty struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
 
 type Configuration struct {
 	Server ServerConfig `json:"server"`
@@ -14,14 +26,16 @@ type Configuration struct {
 }
 
 type ServerConfig struct {
-	Host string `json:"host" env:"SERVERHOST"`
-	Port int    `json:"port" env:"SERVERPORT"`
+	Host         string `json:"host" env:"SERVERHOST"`
+	Port         int    `json:"port" env:"SERVERPORT"`
+	RequestRetry int    `json:"requestRetry" env:"REQUESTRETRY"`
 }
 
 type HostConfig struct {
 	Destination    string `json:"destination" env:"DESTINATION"`
 	UrlPrefix      string `json:"urlPrefix" env:"URLPREFIX"`
-	ServiceInfoUrl string `json:"serviceInfoUrl" env:"SERVICEINFO"`
+	HostRules      string `json:"hostRules" env:"HOSTRULES"`
+	HostProperties string `json:"hostProperties" env:"HOSTPROPERTIES"`
 }
 
 func setValues(item interface{}) error {
@@ -49,15 +63,52 @@ func setValues(item interface{}) error {
 			case reflect.Bool:
 				stringVal = fmt.Sprintf("%b", value.(bool))
 			}
-			_, ok := os.LookupEnv(key)
+			envValue, ok := os.LookupEnv(key)
 			if !ok {
 				log.Printf("+ Seting %s=%s\n", key, stringVal)
-				os.Setenv(key, value.(string))
+				os.Setenv(key, stringVal)
 			} else {
-				log.Printf("+ Skipping %s=%s\n", key, stringVal)
+				log.Printf("+ Skipping %s:%s\n", key, envValue)
 			}
 		}
 	}
+	return nil
+}
+
+func loadHostProperties() error {
+	var err error
+	var response *http.Response
+	url := fmt.Sprintf("%s%s", os.Getenv("DESTINATION"), os.Getenv("HOSTPROPERTIES"))
+	retry, _ := strconv.Atoi(os.Getenv("REQUESTRETRY"))
+	for i := 0; i < retry; i++ {
+		log.Printf("+ Getting properties, attempt #%d\n", i+1)
+		response, err = http.Get(url)
+		if err != nil {
+			response = nil
+			log.Printf("- ERROR: Fail to get properties from:\n%s\n%v", url, err)
+			time.Sleep(time.Second)
+			continue
+		} else {
+			break
+		}
+	}
+	if response != nil {
+		defer response.Body.Close()
+		decoder := json.NewDecoder(response.Body)
+		var properties HostProperties
+		err = decoder.Decode(&properties)
+		if err != nil {
+			log.Printf("- ERROR: Could not decode properties\n%v\n", err)
+		}
+		// load properties to config
+		for _, item := range properties.Items {
+			log.Printf("+ Setting %s=%s\n", item.Key, item.Value)
+			os.Setenv(item.Key, item.Value)
+		}
+	} else {
+		log.Printf("- ERROR: Could not load properties from %s\n", url)
+	}
+
 	return nil
 }
 
@@ -66,15 +117,14 @@ func LoadConfig(configPath string) error {
 	file, e := os.Open(configPath)
 	defer file.Close()
 	if e != nil {
-		log.Fatalf("- Error reading conf\n%v\n", e)
-		panic(e)
+		log.Panicf("- Error reading conf\n%v\n", e)
 	}
 	parser := json.NewDecoder(file)
 	e = parser.Decode(&config)
 	if e != nil {
-		log.Fatalf("- Error parsing config json\n%v\n", e)
-		panic(e)
+		log.Panicf("- Error parsing config json\n%v\n", e)
 	}
-	e = setValues(config)
+	setValues(config)
+	e = loadHostProperties()
 	return e
 }
