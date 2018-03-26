@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/Ppamo/go.sidecar.ambassador/rules"
-	utils "github.com/Ppamo/go.sidecar.ambassador/utils"
+	"github.com/Ppamo/go.sidecar.ambassador/utils"
 	"log"
 	"net/http"
 )
@@ -15,6 +15,29 @@ const (
 var server *http.Server
 var apiRules rules.Rules
 
+func getErrorResponse() string {
+	response := fmt.Sprintf(`{
+	"httpCode": %d,
+	"httpMessage": "%s"
+	"moreInformation": "%s"
+}`, 500, "Internal server error", "500: Internal server error")
+	return response
+}
+
+func requestHandler(w http.ResponseWriter, r *http.Request) {
+	rule := rules.GetRule(r.Method, r.URL.Path)
+	log.Printf("=> %s\n", rule.Description)
+	fmt.Fprintf(w, "{\"status\": \"ok\"}")
+	/*
+		err := rules.LoadRules(r.Method, r.URL.Path)
+		if err != nil {
+			http.Error(w, getErrorResponse(), http.StatusInternalServerError)
+		} else {
+			fmt.Fprintf(w, "{\"status\": \"ok\"}")
+		}
+	*/
+}
+
 func StartServer() error {
 	serverhost := utils.Getenv("SERVERHOST", "0.0.0.0")
 	serverport := utils.Getenv("SERVERPORT", "8080")
@@ -24,24 +47,4 @@ func StartServer() error {
 	http.HandleFunc("/", requestHandler)
 	err := server.ListenAndServe()
 	return err
-}
-
-func requestHandler(w http.ResponseWriter, r *http.Request) {
-	if rules.IsEmpty() {
-		_, e := rules.LoadRules(filepath)
-		if e != nil {
-			log.Fatalf("=> Error loading rules from %s\n%v\n", filepath, e)
-		} else {
-			log.Printf("==> rules loaded!!")
-		}
-
-	}
-	fmt.Fprintf(w, "Hello my world!\n")
-	fmt.Printf("=> Handling request\n")
-	r.ParseForm()
-	fmt.Printf("method: %s\n", r.Method)
-	fmt.Printf("host: %s\n", r.Host)
-	fmt.Printf("url: %s\n", r.URL.Path)
-	fmt.Printf("query: %v\n", r.URL.Query())
-	fmt.Printf("postform: %s\n", r.PostForm)
 }
