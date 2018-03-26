@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,13 +33,13 @@ type ServerConfig struct {
 }
 
 type HostConfig struct {
-	Destination    string `json:"destination" env:"DESTINATION"`
-	UrlPrefix      string `json:"urlPrefix" env:"URLPREFIX"`
-	HostRules      string `json:"hostRules" env:"HOSTRULES"`
-	HostProperties string `json:"hostProperties" env:"HOSTPROPERTIES"`
+	Destination       string `json:"destination" env:"DESTINATION"`
+	UrlPrefix         string `json:"urlPrefix" env:"URLPREFIX"`
+	HostRulesURL      string `json:"hostRulesUrl" env:"HOSTRULESURL"`
+	HostPropertiesURL string `json:"hostPropertiesUrl" env:"HOSTPROPERTIESURL"`
 }
 
-func setValues(item interface{}) error {
+func setValues(item interface{}) {
 	var stringVal string
 	rt := reflect.TypeOf(item)
 	rv := reflect.ValueOf(item)
@@ -72,13 +73,12 @@ func setValues(item interface{}) error {
 			}
 		}
 	}
-	return nil
 }
 
 func loadHostProperties() error {
 	var err error
 	var response *http.Response
-	url := fmt.Sprintf("%s%s", os.Getenv("DESTINATION"), os.Getenv("HOSTPROPERTIES"))
+	url := fmt.Sprintf("%s%s", os.Getenv("DESTINATION"), os.Getenv("HOSTPROPERTIESURL"))
 	retry, _ := strconv.Atoi(os.Getenv("REQUESTRETRY"))
 	for i := 0; i < retry; i++ {
 		log.Printf("+ Getting properties, attempt #%d\n", i+1)
@@ -99,14 +99,15 @@ func loadHostProperties() error {
 		err = decoder.Decode(&properties)
 		if err != nil {
 			log.Printf("- ERROR: Could not decode properties\n%v\n", err)
+			return err
 		}
-		// load properties to config
 		for _, item := range properties.Items {
 			log.Printf("+ Setting %s=%s\n", item.Key, item.Value)
 			os.Setenv(item.Key, item.Value)
 		}
 	} else {
 		log.Printf("- ERROR: Could not load properties from %s\n", url)
+		return errors.New("Failed to load properties")
 	}
 
 	return nil

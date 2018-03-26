@@ -7,7 +7,7 @@
 	"host": {
 		"destination": "http://localhost:8081",
 		"urlPrefix": "/channelActivityHistory/v1.0/contextodatos",
-		"hostRules": "/serviceInfo?item=validation",
-		"hostProperties": "/serviceInfo?item=properties"
+		"hostRulesUrl": "/serviceInfo?item=validation",
+		"hostPropertiesUrl": "/serviceInfo?item=properties"
 	}
 }
