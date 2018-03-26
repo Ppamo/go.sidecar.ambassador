@@ -2,21 +2,23 @@ package server
 
 import (
 	"fmt"
-	"github.com/Ppamo/go.sidecar.ambassador/config"
+	"github.com/Ppamo/go.sidecar.ambassador/rules"
+	utils "github.com/Ppamo/go.sidecar.ambassador/utils"
 	"log"
 	"net/http"
-	"os"
+)
+
+const (
+	filepath = "rules/petstore.swagger.api.json"
 )
 
 var server *http.Server
-var serverConfig config.Configuration
+var apiRules rules.Rules
 
-func StartServer(config config.Configuration) error {
-	port, ok := os.LookupEnv("serverport")
-	if !ok {
-		port = fmt.Sprintf("%d", config.Server.Port)
-	}
-	address := fmt.Sprintf("0.0.0.0:%s", port)
+func StartServer() error {
+	serverhost := utils.Getenv("SERVERHOST", "0.0.0.0")
+	serverport := utils.Getenv("SERVERPORT", "8080")
+	address := fmt.Sprintf("%s:%s", serverhost, serverport)
 	log.Printf("* Starting server at %s\n", address)
 	server = &http.Server{Addr: address}
 	http.HandleFunc("/", requestHandler)
@@ -25,6 +27,15 @@ func StartServer(config config.Configuration) error {
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
+	if rules.IsEmpty() {
+		_, e := rules.LoadRules(filepath)
+		if e != nil {
+			log.Fatalf("=> Error loading rules from %s\n%v\n", filepath, e)
+		} else {
+			log.Printf("==> rules loaded!!")
+		}
+
+	}
 	fmt.Fprintf(w, "Hello my world!\n")
 	fmt.Printf("=> Handling request\n")
 	r.ParseForm()
