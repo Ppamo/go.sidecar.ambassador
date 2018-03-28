@@ -66,7 +66,7 @@ func setValues(item interface{}) {
 			}
 			envValue, ok := os.LookupEnv(key)
 			if !ok {
-				log.Printf("+ Seting %s=%s\n", key, stringVal)
+				log.Printf("+ Setting %s=%s\n", key, stringVal)
 				os.Setenv(key, stringVal)
 			} else {
 				log.Printf("+ Skipping %s:%s\n", key, envValue)
@@ -81,7 +81,7 @@ func loadHostProperties() error {
 	url := fmt.Sprintf("%s%s", os.Getenv("DESTINATION"), os.Getenv("HOSTPROPERTIESURL"))
 	retry, _ := strconv.Atoi(os.Getenv("REQUESTRETRY"))
 	for i := 0; i < retry; i++ {
-		log.Printf("+ Getting properties, attempt #%d\n", i+1)
+		log.Printf("+ Loading properties, attempt #%d\n", i+1)
 		response, err = http.Get(url)
 		if err != nil {
 			response = nil

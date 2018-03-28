@@ -34,7 +34,7 @@ func loadHostRules() (*Rules, error) {
 	url := fmt.Sprintf("%s%s", os.Getenv("DESTINATION"), os.Getenv("HOSTRULESURL"))
 	retry, _ := strconv.Atoi(os.Getenv("REQUESTRETRY"))
 	for i := 0; i < retry; i++ {
-		log.Printf("+ Getting rules, attempt #%d\n", i+1)
+		log.Printf("+ Loading rules, attempt #%d\n", i+1)
 		response, err = http.Get(url)
 		if err != nil {
 			response = nil
@@ -73,7 +73,7 @@ func mapRules(hostRules *Rules) (map[string]Operation, error) {
 }
 
 func GetRule(method string, url string) *Operation {
-	log.Printf("+ Geting rule %s::%s", method, url)
+	log.Printf("+ Getting rule %s::%s", method, url)
 	operation, ok := rules[getMapKey(method, url)]
 	var copy *Operation
 	if ok {
@@ -94,7 +94,7 @@ func GetRule(method string, url string) *Operation {
 		return copy
 
 	}
-	log.Printf("- ERROR: Rule not found\n")
+	log.Printf("- ERROR: Operation not found\n")
 	return nil
 }
 
