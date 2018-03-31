@@ -20,7 +20,8 @@ while [ $INDEX -lt $# ]
 do
 	((INDEX++))
 	case ${@:INDEX:1} in
-		compile)	compile			;;
+		compile)	compile ${@:INDEX}	;;
+		goget)		goget ${@:INDEX}	;;
 		build)
 			DOCKERCOPYFILES="config/config.json" \
 			build

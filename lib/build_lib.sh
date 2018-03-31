@@ -68,13 +68,33 @@ compile(){
 
 
 	CMD="cd \"src/$PROJECT\" && \
-		go get && \
 		GOROOT=/usr/local/go \
 		CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o \"$BINARYFILE\" ."
 
 	docker run --rm --privileged=true -i \
 		-v "$GOPATH:/go" "$GOIMAGE" /bin/sh -c "$CMD"
 	if [ -x $BINARYFILE ]
+	then
+		printf $GREEN"$APP OK!$RESET\n"
+	else
+		printf $RED"$APP Not OK!$RESET\n"
+		exit -1
+	fi
+}
+
+goget(){
+	printf $YELLOW"* Getting $2\n"
+	which git > /dev/null 2>&1
+	if [ $? -ne 0 ]
+	then
+		printf $RED"Git not found! Not OK!$RESET\n"
+		exit -1
+	fi
+	((INDEX++))
+	LIBPATH=$GOPATH/src
+	mkdir -p $LIBPATH/$2
+	git clone https://$2 $LIBPATH/$2
+	if [ $? -eq 0 ]
 	then
 		printf $GREEN"$APP OK!$RESET\n"
 	else
