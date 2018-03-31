@@ -83,7 +83,7 @@ compile(){
 }
 
 goget(){
-	printf $YELLOW"* Getting $2\n"
+	printf $YELLOW"* Getting $2\n$RESET"
 	which git > /dev/null 2>&1
 	if [ $? -ne 0 ]
 	then
@@ -93,7 +93,9 @@ goget(){
 	((INDEX++))
 	LIBPATH=$GOPATH/src
 	mkdir -p $LIBPATH/$2
+	printf "$BLUE"
 	git clone https://$2 $LIBPATH/$2
+	printf "$RESET"
 	if [ $? -eq 0 ]
 	then
 		printf $GREEN"$APP OK!$RESET\n"
