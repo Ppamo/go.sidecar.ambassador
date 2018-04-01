@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Ppamo/go.sidecar.ambassador/structs"
+	"github.com/Ppamo/go.sidecar.ambassador/validator"
 	"log"
 	"net/http"
 	"os"
@@ -57,8 +58,7 @@ func mapRules(hostRules *structs.Rules) (map[string]structs.Operation, error) {
 	rules = make(map[string]structs.Operation)
 	for _, item := range hostRules.Operations {
 		mapkey = getMapKey(item.Method, item.Path)
-		// item.ParamsSchema, err = validator.GetCompiledSchema(item.Params)
-		// item.BodySchema, err = validator.GetCompiledSchema(item.Body)
+		item.ParamsCode, item.BodyCode, err = validator.GetJSONSchemas(item)
 		if err != nil {
 			return nil, err
 		}

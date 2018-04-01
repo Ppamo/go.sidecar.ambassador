@@ -5,13 +5,13 @@ type Rules struct {
 }
 
 type Operation struct {
-	Description  string                 `json:"description"`
-	Method       string                 `json:"method"`
-	Path         string                 `json:"path"`
-	Params       map[string]interface{} `json:"params"`
-	Body         map[string]interface{} `json:"body"`
-	BodySchema   interface{}
-	ParamsSchema interface{}
+	Description string                 `json:"description"`
+	Method      string                 `json:"method"`
+	Path        string                 `json:"path"`
+	Params      map[string]interface{} `json:"params"`
+	Body        map[string]interface{} `json:"body"`
+	ParamsCode  string
+	BodyCode    string
 }
 
 type HostProperties struct {

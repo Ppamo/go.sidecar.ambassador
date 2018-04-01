@@ -1,45 +1,36 @@
 package validator
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/Ppamo/go.sidecar.ambassador/structs"
-	"github.com/xeipuuv/gojsonschema"
+	gjs "github.com/xeipuuv/gojsonschema"
 	"log"
 	"net/http"
 )
 
-func GetCompiledSchema(schema map[string]interface{}) (map[string]interface{}, error) {
-	if schema == nil {
-		return nil, nil
+func GetJSONSchemas(rule structs.Operation) (string, string, error) {
+	var paramsSchema, bodySchema string
+
+	jsonSchema, err := json.Marshal(rule.Params)
+	if err != nil || len(jsonSchema) == 4 {
+		jsonSchema = []byte("{\"additionalProperties\": false}")
 	}
-	buffer := new(bytes.Buffer)
-	err := json.NewEncoder(buffer).Encode(schema)
-	if err != nil {
-		return nil, err
+	paramsSchema = string(jsonSchema)
+
+	jsonSchema, err = json.Marshal(rule.Body)
+	if err != nil || len(jsonSchema) == 4 {
+		jsonSchema = []byte("{\"additionalProperties\": false}")
 	}
-	return nil, nil
+	bodySchema = string(jsonSchema)
+
+	return paramsSchema, bodySchema, nil
 }
 
-func ValidateParams(rule *structs.Operation, request *http.Request) error {
-	var jsonValues, jsonSchema []byte
-	var err error
-	if rule.Params == nil || len(rule.Params) == 0 {
-		jsonSchema = []byte("{\"additionalProperties\": false}")
-	} else {
-		jsonSchema, err = json.Marshal(rule.Params)
-		if err != nil {
-			return err
-		}
-	}
-	jsonValues, err = json.Marshal(request.URL.Query())
-	if err != nil {
-		return err
-	}
-	schemaLoader := gojsonschema.NewStringLoader(string(jsonSchema))
-	paramsLoader := gojsonschema.NewStringLoader(string(jsonValues))
-	result, err := gojsonschema.Validate(schemaLoader, paramsLoader)
+func validate(schema string, code string) error {
+	schemaLoader := gjs.NewStringLoader(schema)
+	paramsLoader := gjs.NewStringLoader(code)
+	result, err := gjs.Validate(schemaLoader, paramsLoader)
 	if err != nil {
 		return err
 	}
@@ -47,11 +38,23 @@ func ValidateParams(rule *structs.Operation, request *http.Request) error {
 		for _, description := range result.Errors() {
 			log.Printf("- VALIDATION ERROR: %s\n", description)
 		}
-		return errors.New("Schema validation errors")
+		return errors.New("Schema validation failed!")
 	}
 	return nil
 }
 
+func ValidateParams(rule *structs.Operation, request *http.Request) error {
+	valuesCode, err := json.Marshal(request.URL.Query())
+	if err != nil {
+		return err
+	}
+	return validate(rule.ParamsCode, string(valuesCode))
+}
+
 func ValidateBody(rule *structs.Operation, request *http.Request) error {
-	return nil
+	valuesCode, err := json.Marshal(request.Body)
+	if err != nil {
+		return err
+	}
+	return validate(rule.BodyCode, string(valuesCode))
 }
