@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Ppamo/go.sidecar.ambassador/structs"
 	"log"
 	"net/http"
 	"os"
@@ -11,33 +12,6 @@ import (
 	"strconv"
 	"time"
 )
-
-type HostProperties struct {
-	Items []HostProperty `json:"properties"`
-}
-
-type HostProperty struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-type Configuration struct {
-	Server ServerConfig `json:"server"`
-	Host   HostConfig   `json:"host"`
-}
-
-type ServerConfig struct {
-	Host         string `json:"host" env:"SERVERHOST"`
-	Port         int    `json:"port" env:"SERVERPORT"`
-	RequestRetry int    `json:"requestRetry" env:"REQUESTRETRY"`
-}
-
-type HostConfig struct {
-	Destination       string `json:"destination" env:"DESTINATION"`
-	UrlPrefix         string `json:"urlPrefix" env:"URLPREFIX"`
-	HostRulesURL      string `json:"hostRulesUrl" env:"HOSTRULESURL"`
-	HostPropertiesURL string `json:"hostPropertiesUrl" env:"HOSTPROPERTIESURL"`
-}
 
 func setValues(item interface{}) {
 	var stringVal string
@@ -95,7 +69,7 @@ func loadHostProperties() error {
 	if response != nil {
 		defer response.Body.Close()
 		decoder := json.NewDecoder(response.Body)
-		var properties HostProperties
+		var properties structs.HostProperties
 		err = decoder.Decode(&properties)
 		if err != nil {
 			log.Printf("- ERROR: Could not decode properties\n%v\n", err)
@@ -114,7 +88,7 @@ func loadHostProperties() error {
 }
 
 func LoadConfig(configPath string) error {
-	var config Configuration
+	var config structs.Configuration
 	file, e := os.Open(configPath)
 	defer file.Close()
 	if e != nil {
