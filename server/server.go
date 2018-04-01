@@ -35,11 +35,11 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("- Unauthorized!\nInvalid request prefix: %s != %s", r.URL.Path, urlPrefix)
 		return
 	}
-	path := strings.TrimPrefix(r.URL.Path, urlPrefix)
-	rule := rules.GetRule(r.Method, path)
+	url := strings.TrimPrefix(r.URL.Path, urlPrefix)
+	rule := rules.GetRule(r.Method, url)
 	if rule == nil {
 		http.Error(w, getErrorResponse(403, "Forbidden"), http.StatusForbidden)
-		log.Printf("- Unauthorized!\nNo rule found for request %s::%s", r.Method, path)
+		log.Printf("- Unauthorized!\nNo rule found for request %s::%s", r.Method, url)
 		return
 	}
 	log.Printf("+ Operation: %s", rule.Description)
@@ -56,7 +56,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("+ Autorized!")
-	url := fmt.Sprintf("%s/%s", utils.Getenv("DESTINATION", ""), r.URL.RequestURI())
+	url = fmt.Sprintf("%s/%s", utils.Getenv("DESTINATION", ""), url)
 	response, err := http.Get(url)
 	if err != nil {
 		http.Error(w, getErrorResponse(404, "Not Found"), http.StatusNotFound)
