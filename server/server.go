@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"github.com/Ppamo/go.sidecar.ambassador/rules"
-	"github.com/Ppamo/go.sidecar.ambassador/structs"
 	"github.com/Ppamo/go.sidecar.ambassador/utils"
 	"github.com/Ppamo/go.sidecar.ambassador/validator"
 	"io/ioutil"
@@ -12,12 +11,7 @@ import (
 	"strings"
 )
 
-const (
-	filepath = "rules/petstore.swagger.api.json"
-)
-
 var server *http.Server
-var apiRules structs.Rules
 
 func getErrorResponse(code int, message string) string {
 	response := fmt.Sprintf(`{
