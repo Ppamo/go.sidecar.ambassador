@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/Ppamo/go.sidecar.ambassador/structs"
 	"log"
@@ -81,7 +80,6 @@ func loadHostProperties() error {
 		}
 	} else {
 		log.Printf("- ERROR: Could not load properties from %s\n", url)
-		return errors.New("Failed to load properties")
 	}
 
 	return nil
