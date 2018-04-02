@@ -27,7 +27,12 @@ do
 			build
 			;;
 		run)
-			DOCKERENV="-e SERVERPORT=8080 -e DESTINATION=http://172.17.0.2:8081" \
+			DUMMYID=$(docker ps --filter name=dummy --format "{{.ID}}")
+			if [ $DUMMYID ]
+			then
+				DUMMYIP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $DUMMYID)
+			fi
+			DOCKERENV="-e SERVERPORT=8080 -e DESTINATION=http://$DUMMYIP:8081" \
 			run
 			;;
 		clean)		clean			;;
