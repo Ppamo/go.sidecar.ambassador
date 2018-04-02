@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Ppamo/go.sidecar.ambassador/structs"
 	"github.com/Ppamo/go.sidecar.ambassador/validator"
@@ -44,6 +45,8 @@ func loadHostRules() (*structs.Rules, error) {
 			log.Printf("- ERROR: Could not decode response\n%v\n", err)
 			return nil, err
 		}
+	} else {
+		return nil, errors.New("Could not load rules from host")
 	}
 	return rules, nil
 }
