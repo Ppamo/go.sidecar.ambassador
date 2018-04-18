@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -20,6 +21,17 @@ func getErrorResponse(code int, message string) string {
 	"moreInformation": "%[1]d: %[2]s"
 }`, code, message)
 	return response
+}
+
+func livenessRequestHandler(w http.ResponseWriter, r *http.Request) {
+	url := fmt.Sprintf("%s%s", os.Getenv("DESTINATION"), os.Getenv("HOSTRULESURL"))
+	log.Printf("+ Checking liveness at %s", url)
+	_, err := http.Get(url)
+	if err != nil {
+		http.Error(w, "{\"status\":\"nok\"}", http.StatusInternalServerError)
+	} else {
+		fmt.Fprintf(w, "{\"status\":\"ok\"}")
+	}
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
@@ -73,6 +85,7 @@ func StartServer() error {
 	log.Printf("* Starting server at %s\n", address)
 	server = &http.Server{Addr: address}
 	http.HandleFunc("/", requestHandler)
+	http.HandleFunc("/service/status", livenessRequestHandler)
 	err := server.ListenAndServe()
 	return err
 }
