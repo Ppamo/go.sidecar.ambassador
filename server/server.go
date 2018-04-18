@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 )
 
@@ -52,6 +53,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("+ Autorized!")
 	return
 	url = fmt.Sprintf("%s/%s", utils.Getenv("DESTINATION", ""), url)
+
 	response, err := http.Get(url)
 	if err != nil {
 		http.Error(w, getErrorResponse(404, "Not Found"), http.StatusNotFound)
@@ -67,26 +69,32 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(body))
 }
 
+func reverseHandler(w http.ResponseWriter, r *http.Request) {
+	director := func(req *http.Request) {
+		req = r
+		req.URL.Scheme = "http"
+		req.URL.Host = r.Host
+	}
+	proxy := &httputil.ReverseProxy{Director: director}
+	proxy.ServeHTTP(w, r)
+}
+
+func StartServer() error {
+	address := fmt.Sprintf("%s:%s",
+		utils.Getenv("SERVERHOST", "0.0.0.0"),
+		utils.Getenv("SERVERPORT", "8080"))
+	log.Printf("* Starting server at %s\n", address)
+	server = &http.Server{Addr: address}
+	http.HandleFunc("/", reverseHandler)
+	return server.ListenAndServe()
+}
+
 func StartServer__() error {
 	address := fmt.Sprintf("%s:%s",
 		utils.Getenv("SERVERHOST", "0.0.0.0"),
 		utils.Getenv("SERVERPORT", "8080"))
 	log.Printf("* Starting server at %s\n", address)
 	server = &http.Server{Addr: address}
-	http.HandleFunc("/", requestHandler)
-	err := server.ListenAndServe()
-	return err
-}
-
-func StartServer() error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		director := func(req *http.Request) {
-			req = r
-			req.URL.Scheme = "http"
-			req.URL.Host = r.Host
-		}
-		proxy := &httputil.ReverseProxy{Director: director}
-		proxy.ServeHTTP(w, r)
-	})
-	log.Fatal(http.ListenAndServe(":8181", nil))
+	http.HandleFunc("/", reverseHandler)
+	return server.ListenAndServe()
 }
