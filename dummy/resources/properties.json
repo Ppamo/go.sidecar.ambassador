@@ -3,7 +3,7 @@
 		"key": "SERVICENAME",
 		"value": "ms-mensajeria"
 	},{
-		"key": "SERVICEURLPREFIX",
+		"key": "__SERVICEURLPREFIX",
 		"value": "/channelActivityHistory/v1.0/mensajeria"
 	}]
 }

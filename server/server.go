@@ -50,6 +50,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("+ Autorized!")
+	return
 	url = fmt.Sprintf("%s/%s", utils.Getenv("DESTINATION", ""), url)
 	response, err := http.Get(url)
 	if err != nil {
@@ -66,7 +67,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(body))
 }
 
-func StartServer() error {
+func StartServer__() error {
 	address := fmt.Sprintf("%s:%s",
 		utils.Getenv("SERVERHOST", "0.0.0.0"),
 		utils.Getenv("SERVERPORT", "8080"))
@@ -75,4 +76,17 @@ func StartServer() error {
 	http.HandleFunc("/", requestHandler)
 	err := server.ListenAndServe()
 	return err
+}
+
+func StartServer() error {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		director := func(req *http.Request) {
+			req = r
+			req.URL.Scheme = "http"
+			req.URL.Host = r.Host
+		}
+		proxy := &httputil.ReverseProxy{Director: director}
+		proxy.ServeHTTP(w, r)
+	})
+	log.Fatal(http.ListenAndServe(":8181", nil))
 }
