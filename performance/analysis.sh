@@ -52,7 +52,7 @@ print_diff(){
 	else
 		COLOR=$RED
 	fi
-	printf "\t%-21s: $COLOR%+9.4f$RESET   [$1/$2]\n" "$3" $DIFF
+	printf "   %-21s: $COLOR%+9.4f$RESET   [$1/$2]\n" "$3" $DIFF
 }
 
 get_results(){
@@ -70,31 +70,32 @@ get_results(){
 	CTPR=$(echo "$2" | grep "Time per request:" | tail -n 1 | awk '{ print $4 }')
 	TRANSFERRATE=$(echo "$2" | grep "Transfer rate:" | head -n 1 | awk '{ print $3 }')
 
-	printf "\nResults:\n"
 	NEGATIVE=1 print_diff $BASESPENTTIME $SPENTTIME "Spent time"
 	# print_diff "$BASEFAILED" "$FAILED" "Failed requests"
 	print_diff $BASERPS $RPS "Requests per second"
 	NEGATIVE=1 print_diff $BASETPR $TPR "Time per request"
-	print_diff $BASETRANSFERRATE $TRANSFERRATE "Transfer rate"
 }
 
-printf $YELLOW"+ Starting nginx\n"$RESET
-start_nginx
-printf $YELLOW"+ Starting dummy\n"$RESET
-start_dummy
+URLBASE=${$1:="http://$DOCKERHOST:$NGINXPORT/"}
+URL=${$2:="http://$DOCKERHOST:8081/":=}
+
+# printf $YELLOW"+ Starting nginx\n"$RESET
+# start_nginx
+# printf $YELLOW"+ Starting dummy\n"$RESET
+# start_dummy
 printf $YELLOW"+ Testing scenario 1\n"$RESET
-RESULTS_TEST01=$(do_test 500 2500 http://$DOCKERHOST:$NGINXPORT/ http://$DOCKERHOST:8081/)
+RESULTS_TEST01=$(do_test 500 2000 $URLBASE $URL)
 printf $YELLOW"+ Testing scenario 2\n"$RESET
-RESULTS_TEST02=$(do_test 1000 5000 http://$DOCKERHOST:$NGINXPORT/ http://$DOCKERHOST:8081/)
-printf $YELLOW"+ Testing scenario 3\n"$RESET
-RESULTS_TEST03=$(do_test 1500 7500 http://$DOCKERHOST:$NGINXPORT/ http://$DOCKERHOST:8081/)
-printf -- $YELLOW"- Stoping nginx\n"$RESET
-stop_nginx
-printf -- $YELLOW"- Stoping dummy\n"$RESET
-stop_dummy
+RESULTS_TEST02=$(do_test 1000 3000 $URLBASE $URL)
+# printf $YELLOW"+ Testing scenario 3\n"$RESET
+# RESULTS_TEST03=$(do_test 1500 7500 $URLBASE $URL)
+# printf -- $YELLOW"- Stoping nginx\n"$RESET
+# stop_nginx
+# printf -- $YELLOW"- Stoping dummy\n"$RESET
+# stop_dummy
 printf -- $BLUE"- Scenario 01\n"$RESET
 echo "$RESULTS_TEST01"
 printf -- $BLUE"- Scenario 02\n"$RESET
 echo "$RESULTS_TEST02"
-printf -- $BLUE"- Scenario 03\n"$RESET
-echo "$RESULTS_TEST03"
+# printf -- $BLUE"- Scenario 03\n"$RESET
+# echo "$RESULTS_TEST03"
