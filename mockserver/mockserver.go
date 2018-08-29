@@ -26,6 +26,7 @@ func main() {
 
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("+ RH: %s::%s\n", r.Method, r.RequestURI)
 	fmt.Fprintf(w, "{\"status\": \"ok\"}")
 }
 
@@ -48,7 +49,6 @@ func getMockPath(serviceName string) string {
 }
 
 func loadServiceMock(serviceName string) (string, error) {
-	fmt.Printf("=> Path: %s\n", getMockPath(serviceName))
 	file, err := os.Open(getMockPath(serviceName))
 	if err != nil {return "", err }
 	defer file.Close()
@@ -61,30 +61,43 @@ func loadServiceMock(serviceName string) (string, error) {
 	return buffer.String(), nil
 }
 
-func getResponse(serviceName string) string {
+func getResponse(serviceName string) (string, error) {
 	response, err := loadServiceMock(serviceName)
 	if err != nil {
-		return get404ErrorResponse()
+		return get404ErrorResponse(), err
 	}
-	return response
+	mock := new(Mock)
+	err = json.Unmarshal([]byte(response), &mock)
+	if err != nil {
+		return "{}", fmt.Errorf("JSon UnMarshal failed\n%s", err)
+	}
+	body, err := json.Marshal(mock.Body)
+	if err != nil {
+		return "{}", err
+	}
+	return string(body), nil
 }
 
 func getRequest(w http.ResponseWriter, r *http.Request) (*Request, error) {
-	if r.Body == nil { return nil, errors.New("La peticion es vacia") }
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil { return nil, err }
+	if len(body) == 0 { return nil, errors.New("Body is empty!") }
 	defer r.Body.Close()
-	body, _ := ioutil.ReadAll(r.Body)
 	request := new(Request)
-	err := json.Unmarshal(body, &request)
+	err = json.Unmarshal(body, &request)
 	if err != nil { return nil, fmt.Errorf("JSon UnMarshal failed\n%s", err) }
 	return request, nil
 }
 
 func requestBroker(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("+ RB: %s::%s\n", r.Method, r.RequestURI)
 	request,err := getRequest(w, r)
 	if (err != nil) {
-		fmt.Printf("=> %v\n", request)
+		fmt.Printf("- ERROR: %v\n", err)
 		fmt.Fprintf(w, getErrorResponse())
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, getResponse(request.Data["service_name"].(string)))
+	response, err := getResponse(request.Data["service_name"].(string))
+	fmt.Fprintf(w, response)
 }

@@ -10,3 +10,7 @@ type RequestContext struct {
 	Application     string                  `json:"application"`
 	ChannelId       string                  `json:"channel_id"`
 }
+
+type Mock struct {
+	Body		map[string]interface{}	`json:"body"`
+}
