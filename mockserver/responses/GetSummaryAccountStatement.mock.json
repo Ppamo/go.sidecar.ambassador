@@ -1,0 +1,84 @@
+{
+  "body": {
+    "data": {
+      "GetSummaryAccountStatementRs": {
+        "SummaryAccountStatementList": {
+          "SummaryAccountStatement": [
+            {
+              "AcctInfo": {
+                "AcctBal": {
+                  "CurAmt": {
+                    "Amt": "0.00"
+                  },
+                  "BalType": {
+                    "Avail": "-4136.00",
+                    "Ledger": "-4136.00"
+                  }
+                },
+                "CreditAcctData": {
+                  "LOCOverdraftData": {
+                    "Avail": "0.00"
+                  }
+                },
+                "AcctIdent": {
+                  "AcctIdentValue": "00390001000200003262"
+                }
+              }
+            },
+            {
+              "AcctTrnRec": {
+                "AcctTrnInfo": {
+                  "ChkNum": "6298 6832"
+                }
+              },
+              "AcctInfo": {
+                "AcctBal": {
+                  "CurAmt": {
+                    "Amt": "0.00"
+                  },
+                  "BalType": {
+                    "Avail": "464914.00",
+                    "Ledger": "464914.00"
+                  }
+                },
+                "CreditAcctData": {
+                  "LOCLoanData": {
+                    "LOCId": "00390001000200003252"
+                  },
+                  "LOCOverdraftData": {
+                    "Avail": "4620000.00"
+                  }
+                },
+                "MaturityDt": "9999-12-31",
+                "AcctIdent": {
+                  "AcctIdentValue": "00390001000200003272"
+                }
+              }
+            }
+          ]
+        },
+        "PersonPartyInfo": {
+          "PersonData": {
+            "PersonName": {
+              "GivenName": "COVACEVICH CORNEJO JUAN PABLO"
+            }
+          }
+        },
+        "AcctTrnRec": {
+          "AcctTrnInfo": {
+            "PostedDt": "2018-08-28T17:18:15"
+          }
+        },
+        "MsgRsHdr": {
+          "ContextRsHdr": "",
+          "Status": {
+            "StatusDesc": "Success",
+            "Severity": "Info",
+            "StatusCode": "0"
+          }
+        },
+        "-NS1": "http://itau.cl/xmlns/LoansAndDeposits/CurrentAccount/CurrentAccount/GetSummaryAccountStatement/1"
+      }
+    }
+  }
+}

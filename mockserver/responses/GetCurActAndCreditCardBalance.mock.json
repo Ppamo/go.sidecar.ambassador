@@ -1,0 +1,21 @@
+{
+  "body": {
+    "data": {
+      "GetCurActAndCreditCardBalanceRs": {
+        "MsgRsHdr": {
+          "Status": {
+            "StatusDesc": "Success",
+            "AdditionalStatus": {
+              "StatusDesc": "Cliente no posee productos vigentes",
+              "Severity": "Error",
+              "StatusCode": "0001"
+            },
+            "Severity": "Info",
+            "StatusCode": "0"
+          }
+        },
+        "-NS1": "http://itau.cl/xmlns/LoansAndDeposit/CurrentAccount/CurrentAccount/GetCurActAndCreditCardBalance/1"
+      }
+    }
+  }
+}

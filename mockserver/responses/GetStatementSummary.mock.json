@@ -1,0 +1,95 @@
+{
+  "body": {
+    "data": {
+      "GetStatementSummaryRs": {
+        "CardList": {
+          "Card": [
+            {
+              "CardAcctRelInfo": {
+                "CardRef": {
+                  "CardInfo": {
+                    "Brand": "MASTERCARD",
+                    "CardNum": "5522526100750530",
+                    "CardCategory": "MASTERCARD BLACK",
+                    "CreditAcctData": {
+                      "LOCLoanData": {
+                        "MinPmt": {
+                          "Amt": "1946545.00"
+                        },
+                        "Amt": "47044276.00",
+                        "USDAmt": "2955724.00"
+                      },
+                      "Freq": "5",
+                      "LastPmt": {
+                        "IssueDt": "2019-05-31T00:00:00"
+                      },
+                      "LastPmtDt": "2018-06-26T00:00:00"
+                    },
+                    "CardBranch": "M",
+                    "Name": "FIGUEROA MELLADO ENILDA TERESA"
+                  }
+                }
+              }
+            },
+            {
+              "CardAcctRelInfo": {
+                "CardRef": {
+                  "CardInfo": {
+                    "Brand": "VISA",
+                    "CardNum": "4191890268052722",
+                    "CardCategory": "VISA PLATINUM",
+                    "CreditAcctData": {
+                      "LOCLoanData": {
+                        "MinPmt": {
+                          "Amt": "1548811.00"
+                        },
+                        "Amt": "15713904.00",
+                        "USDAmt": "4344844.00"
+                      },
+                      "Freq": "5",
+                      "LastPmt": {
+                        "IssueDt": "2019-05-31T00:00:00"
+                      },
+                      "LastPmtDt": "2018-06-26T00:00:00"
+                    },
+                    "CardBranch": "V",
+                    "Name": "FIGUEROA MELLADO ENILDA TERESA"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "MsgRsHdr": {
+          "Status": {
+            "StatusDesc": "Success",
+            "Severity": "Info",
+            "StatusCode": "0"
+          }
+        },
+        "-NS1": "http://itau.cl/xmlns/Cards/CardBillingPayments/CardBillingPayments/GetStatementSummary/1",
+        "CardAcctRelInfo": {
+          "AcctRef": {
+            "AcctInfo": {
+              "AcctBal": {
+                "CurAmt": {
+                  "CurCode": {
+                    "CurCodeValue": "CHEZ"
+                  },
+                  "Amt": "60000000"
+                }
+              }
+            }
+          },
+          "CardRef": {
+            "CardInfo": {
+              "CreditAcctData": {
+                "ConditionInd": "0"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
