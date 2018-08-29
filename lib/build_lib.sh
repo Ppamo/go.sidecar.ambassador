@@ -144,8 +144,9 @@ run(){
 	if [ "$VERSION" ]
 	then
 		printf "$YELLOW+ Running $IMAGENAME:$VERSION $RESET\n"
+		echo MSYS_NO_PATHCONV=1 docker run -p $PORT:$PORT $DOCKERENV $DOCKERVOLUMES --rm --name "$APP" -i $IMAGENAME:$VERSION
 		trap sigint_handler SIGINT
-		docker run -p $PORT:$PORT $DOCKERENV --rm --name "$APP" -i $IMAGENAME:$VERSION
+		MSYS_NO_PATHCONV=1 docker run -p $PORT:$PORT $DOCKERENV $DOCKERVOLUMES --rm --name "$APP" -i $IMAGENAME:$VERSION
 	else
 		printf "$RED- ERROR: no image found, please compile and build first, OK! $RESET\n"
 	fi
